@@ -78,8 +78,8 @@ To get started with this project, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/username/68000-homebrew-computer.git
-   cd 68000-homebrew-computer
+   git clone https://github.com/rdearman/my_m68k.git
+   cd my_m68k
    ```
 
 2. **Build the source code**:
@@ -88,7 +88,7 @@ To get started with this project, follow these steps:
    ```
 
 3. **Load the bootloader and OS** to the ROM chips:
-   - For detailed steps on flashing the ROM, refer to the [Setup Guide](docs/Setup.md).
+   - For detailed steps on flashing the ROM, refer to the [Setup Guide](docs/Setup.md). (TBD)
 
 4. **To use with emulator instead**:
    ```bash
