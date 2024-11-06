@@ -1,10 +1,10 @@
 .org 0x00000000
-# .long 0x00200000 /* Initial stack pointer */
 .long 0x1400000     /* Initial Stack Pointer */
 .long _start    /* Start of bootloader code */
 
 .global _start  
 .global _post
+.global print_message
 
 /* External functions for device initialisation */
 .extern spi_init, spi_check, i2c_init, rtc_check
@@ -19,10 +19,25 @@ MONITOR_ENTRY:
     jmp _idle_loop
 .endif
 	
+print_message:
+    /* Input: %d0 = index of the message to print */
+    move.l messages(,%d0.l,4), %a0   /* Load the pointer to the selected message into %a0 */
+print_loop:
+    move.b (%a0)+, %d1               /* Load next byte of the message into %d1  */
+    beq done_print                   /* If null terminator, were done  */
+    jsr uart_send_byte               /* Call uart_send_byte to send character in %d1  */
+    bra print_loop                   /* Repeat for next character  */
+
+done_print:
+    rts                               /* Return from subroutine */
+	
+	
 /* Bootloader entry point */
 _start:
     move.l  #0x200000, %a7  /* Set up stack pointer to top of RAM */
 	/* Clear registers */
+	move.l #0, %d0            /* Load the index of the message (e.g., 0 for "Clearing Memory")*/
+    jsr print_message         /* Print the message at messages[0] */
     clr.l %d0
     clr.l %d1
     clr.l %d2
@@ -40,6 +55,9 @@ _start:
     move.l #0, %a5
     move.l #0, %a6
 	
+	move.l #1, %d0            /* Load the index of the message (e.g., 0 for "Disabling Interrupts")*/
+    jsr print_message         /* Print the message at messages[1] */	
+	
     move.w  #0x2700, %sr    /* Disable interrupts */
 
     jsr _post               /* Call POST (Power-On Self Test) */
@@ -56,6 +74,9 @@ monitor_start:
 
 /* POST - Power-On Self-Test */
 _post:
+	move.l #2, %d0            /* Load the index of the message (e.g., 0 for "Starting Memory Check")*/
+    jsr print_message         /* Print the message at messages[2] */	
+
     /* Memory Check */
     jsr memory_check
     beq memory_fail         /* Branch if memory test fails */
@@ -120,20 +141,23 @@ post_complete:
     /* Code to signal POST completion (e.g., lighting an LED, outputting over serial) */
     rts
 
-/* Memory Check Routine */
+/* Enhanced Memory Check Routine */
 memory_check:
-    move.l  #0xA5A5A5A5, %d0         /* Test pattern */
-    move.l  #0x200000, %a0            /* Start of test memory region */
-    move.l  #0x210000, %a1            /* End of test memory region */
+    /* Test pattern 1 */
+    move.l  #0xA5A5A5A5, %d0         /* Test pattern 1 */
+    bsr     memory_pattern_test
 
-memory_test_loop:
-    move.l  %d0, (%a0)                /* Write pattern to memory */
-    move.l  (%a0), %d1                /* Load value from memory into %d1 */
-    cmp.l   %d0, %d1                  /* Compare %d0 with %d1 */
-    bne     memory_test_fail          /* Branch if check fails */
-    addq.l  #4, %a0                   /* Move to the next location */
-    cmp.l   %a1, %a0                  /* Check if end of region reached */
-    bcs     memory_test_loop          /* Loop if not finished */
+    /* Test pattern 2 */
+    move.l  #0xAAAAAAAA, %d0          /* Test pattern 2 */
+    bsr     memory_pattern_test
+
+    /* Test pattern 3 */
+    move.l  #0x55555555, %d0          /* Test pattern 3 */
+    bsr     memory_pattern_test
+
+    /* Address test */
+    bsr     memory_address_test
+
     clr.l   %d0                       /* Set return success status */
     rts
 
@@ -141,6 +165,50 @@ memory_test_fail:
     move.l  #1, %d0                   /* Set return failure status */
     rts
 
+/* Memory Pattern Test Subroutine */
+memory_pattern_test:
+    move.l  #0x200000, %a0            /* Start of test memory region */
+    move.l  #0x210000, %a1            /* End of test memory region */
+
+pattern_test_loop:
+    move.l  %d0, (%a0)                /* Write pattern to memory */
+    move.l  (%a0), %d1                /* Load value from memory into %d1 */
+    cmp.l   %d0, %d1                  /* Compare %d0 with %d1 */
+    bne     memory_test_fail          /* Branch if check fails */
+    addq.l  #4, %a0                   /* Move to the next location */
+    cmp.l   %a1, %a0                  /* Check if end of region reached */
+    bcs     pattern_test_loop         /* Loop if not finished */
+    rts
+
+/* Address-Based Memory Test Subroutine */
+memory_address_test:
+    move.l  #0x200000, %a0            /* Start of test memory region */
+    move.l  #0x210000, %a1            /* End of test memory region */
+
+address_test_loop:
+    move.l  %a0, (%a0)                /* Write address value to memory */
+    move.l  (%a0), %d1                /* Load value from memory into %d1 */
+    cmp.l   %a0, %d1                  /* Compare address with value */
+    bne     memory_test_fail          /* Branch if check fails */
+    addq.l  #4, %a0                   /* Move to the next location */
+    cmp.l   %a1, %a0                  /* Check if end of region reached */
+    bcs     address_test_loop         /* Loop if not finished */
+    rts
+
+
 /* Idle loop in case of bootloader failure */
 _idle_loop:
     bra _idle_loop
+
+.section .data
+messages:
+    .long message0          ; Pointer to "Clearing Memory"
+    .long message1          ; Pointer to "Disabling Interrupts"
+    .long message2          ; Pointer to "Starting Memory Check"
+
+message0:
+    dc.b 'Clearing Memory', 0
+message1:
+    dc.b 'Disabling Interrupts', 0
+message2:
+    dc.b 'Starting Memory Check', 0
