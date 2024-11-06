@@ -2,6 +2,27 @@
 .long 0x1400000     /* Initial Stack Pointer */
 .long _start    /* Start of bootloader code */
 
+.section .data            /* Declare data section explicitly */
+.align 4                  /* Ensure proper alignment for pointers */
+
+messages:
+    .long message0
+    .long message1
+    .long message2
+
+message0:
+	.ascii "Clearing Memory"
+	.byte 0
+message1:
+	.ascii "Disabling Interrupts"
+	.byte
+message2:
+	.ascii "Starting Memory Check"
+	.byte
+
+	
+.text	
+
 .global _start  
 .global _post
 .global print_message
@@ -20,8 +41,18 @@ MONITOR_ENTRY:
 .endif
 	
 print_message:
-    /* Input: %d0 = index of the message to print */
-    move.l messages(,%d0.l,4), %a0   /* Load the pointer to the selected message into %a0 */
+/* 
+    This section performs the following:
+    1. Copies the index to a data register.
+    2. Multiplies the index by 4 to access the correct pointer in the messages array.
+    3. Loads the address of the message into the address register a0.
+*/
+	move.l %d0, %d1
+	lsl.l  #2, %d1
+	movea.l %d1, %a1
+	move.l messages(%a1), %a0
+
+
 print_loop:
     move.b (%a0)+, %d1               /* Load next byte of the message into %d1  */
     beq done_print                   /* If null terminator, were done  */
@@ -200,15 +231,3 @@ address_test_loop:
 _idle_loop:
     bra _idle_loop
 
-.section .data
-messages:
-    .long message0          ; Pointer to "Clearing Memory"
-    .long message1          ; Pointer to "Disabling Interrupts"
-    .long message2          ; Pointer to "Starting Memory Check"
-
-message0:
-    dc.b 'Clearing Memory', 0
-message1:
-    dc.b 'Disabling Interrupts', 0
-message2:
-    dc.b 'Starting Memory Check', 0

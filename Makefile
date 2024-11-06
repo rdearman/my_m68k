@@ -43,11 +43,11 @@ bootloader: $(BOOTLOADER_ELF) $(BOOTLOADER_BIN_HIGH) $(BOOTLOADER_BIN_LOW)
 
 # Compile bootloader source
 $(BOOTLOADER_OBJ): $(BOOTLOADER_SRC) | $(BUILD_DIR)
-	-DMONITOR_ENTRY=$(MONITOR_ENTRY) $(AS) $(CFLAGS)  -o "$@" "$<"
+	$(AS) --defsym MONITOR_ENTRY=$(MONITOR_ENTRY) $(CFLAGS)  -o "$@" "$<"
 
 # Compile each common object file in COMMON_SRC
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s | $(BUILD_DIR)
-	-DMONITOR_ENTRY=$(MONITOR_ENTRY) $(AS) $(CFLAGS) -o "$@" "$<"
+	$(AS) --defsym MONITOR_ENTRY=$(MONITOR_ENTRY) $(CFLAGS) -o "$@" "$<"
 
 # Link the ELF file
 $(BOOTLOADER_ELF): $(BOOTLOADER_OBJ) $(COMMON_OBJ) | $(BIN_DIR)
