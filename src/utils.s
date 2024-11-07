@@ -7,6 +7,7 @@ DEBUG_UART   =   0
 DEBUG_LCD    =  1
 DEBUG_MODVGA = 2
 
+
 /* Default debug output device */
 	.align 2
 debug_output_device: .byte DEBUG_UART  /* Default to UART */

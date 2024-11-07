@@ -1,8 +1,25 @@
 # Toolchain
-AS = m68k-linux-gnu-as
-LD = m68k-linux-gnu-ld
-OBJCOPY = m68k-linux-gnu-objcopy
+
 CFLAGS := -m68000 -g
+
+# Check if running on Windows
+ifeq ($(OS),Windows_NT)
+    AS = m68k-elf-as.exe
+    LD = m68k-elf-ld.exe
+    OBJCOPY = m68k-elf-objcopy.exe
+
+    # Define PowerShell commands for Windows
+    CREATE_BOOTLOADER_HIGH = powershell -Command "(Get-Content -Path bin/bootloader.bin -Encoding Byte)[1..2] | Set-Content -Path bin/bootloader_high.bin -Encoding Byte"
+    CREATE_BOOTLOADER_LOW = powershell -Command "(Get-Content -Path bin/bootloader.bin -Encoding Byte)[0..1] | Set-Content -Path bin/bootloader_low.bin -Encoding Byte"
+else
+    AS = m68k-linux-gnu-as
+    LD = m68k-linux-gnu-ld
+    OBJCOPY = m68k-linux-gnu-objcopy
+
+    # Define dd commands for Unix-based systems
+    CREATE_BOOTLOADER_HIGH = dd if=bin/bootloader.bin of=bin/bootloader_high.bin bs=1 skip=1 count=2
+    CREATE_BOOTLOADER_LOW = dd if=bin/bootloader.bin of=bin/bootloader_low.bin bs=1 skip=0 count=2
+endif
 
 # Directories
 SRC_DIR := src
@@ -31,6 +48,13 @@ else
     MONITOR_ENTRY = _idle_loop
 endif
 
+# Conditional Monitor Entry
+ifeq ($(QEMU),1)
+    QEMU = 1
+else
+    QEMU = 0
+endif
+
 # Linker flags
 BOOTLOADER_LD_FLAGS := -Ttext=0x000000
 
@@ -43,11 +67,11 @@ bootloader: $(BOOTLOADER_ELF) $(BOOTLOADER_BIN_HIGH) $(BOOTLOADER_BIN_LOW)
 
 # Compile bootloader source
 $(BOOTLOADER_OBJ): $(BOOTLOADER_SRC) | $(BUILD_DIR)
-	$(AS) --defsym MONITOR_ENTRY=$(MONITOR_ENTRY) $(CFLAGS)  -o "$@" "$<"
+	$(AS) --defsym MONITOR_ENTRY=$(MONITOR_ENTRY) --defsym QEMU=$(QEMU) $(CFLAGS)  -o "$@" "$<"
 
 # Compile each common object file in COMMON_SRC
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s | $(BUILD_DIR)
-	$(AS) --defsym MONITOR_ENTRY=$(MONITOR_ENTRY) $(CFLAGS) -o "$@" "$<"
+	$(AS) --defsym MONITOR_ENTRY=$(MONITOR_ENTRY) --defsym QEMU=$(QEMU) $(CFLAGS) -o "$@" "$<"
 
 # Link the ELF file
 $(BOOTLOADER_ELF): $(BOOTLOADER_OBJ) $(COMMON_OBJ) | $(BIN_DIR)
@@ -58,10 +82,10 @@ $(BOOTLOADER_BIN): $(BOOTLOADER_ELF)
 	$(OBJCOPY) -O binary $< $@
 
 $(BOOTLOADER_BIN_HIGH): $(BOOTLOADER_BIN)
-	dd if=$< of=$@ bs=1 skip=1 count=2
+	$(CREATE_BOOTLOADER_HIGH)
 
 $(BOOTLOADER_BIN_LOW): $(BOOTLOADER_BIN)
-	dd if=$< of=$@ bs=1 count=2
+	$(CREATE_BOOTLOADER_LOW)
 
 # Ensure build and bin directories exist
 $(BUILD_DIR):
