@@ -144,12 +144,12 @@ This section defines the memory layout for the Motorola 68000 homebrew computer 
 
 | Multiplexer Output | Address Range / Device            | Description                                      |
 |--------------------|-----------------------------------|--------------------------------------------------|
-| `Y1 (0001)`        | D43256C (RAM)                    | Lower RAM device                                 |
-| `Y2 (0010)`        | W65C22N6TPG (VIA Chip) CS1       | First chip select for VIA                        |
-| `Y3 (0011)`        | W65C22N6TPG (VIA Chip) CS2       | Second chip select for VIA                       |
-| `Y4 (0100)`        | M82C51A (UART) WR                | Write line for UART                              |
-| `Y5 (0101)`        | M82C51A (UART) RD                | Read line for UART                               |
-| `Y6 (0110)`        | CD74HCT245P (Data Bus Transceiver) | Controls data flow direction                     |
+| `Y1 (0x10000000)`        | D43256C (RAM)                    | Lower RAM device                                 |
+| `Y2 (0x20000000)`        | W65C22N6TPG (VIA Chip) CS1       | First chip select for VIA                        |
+| `Y3 (0x20000000)`        | W65C22N6TPG (VIA Chip) CS2       | Second chip select for VIA                       |
+| `Y4 (0x40000000)`        | M82C51A (UART) WR                | Write line for UART                              |
+| `Y5 (0x50000000)`        | M82C51A (UART) RD                | Read line for UART                               |
+| `Y6 (0x60000000)`        | CD74HCT245P (Data Bus Transceiver) | Controls data flow direction                     |
 
 | Address Range        | Description                        |
 |----------------------|------------------------------------|
