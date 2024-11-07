@@ -29,6 +29,7 @@
     .equ UART_CTRL_REG, UART_BASE_ADDR + 0x02 /* UART control register offset */
     .equ UART_STATUS_REG, UART_BASE_ADDR + 0x04 /* UART status register offset */
 
+	
     /* ===== SPI Configuration ===== */
     .equ SPI_BASE_ADDR, 0xC00020        /* SPI base memory-mapped I/O address */
     .equ SPI_INTERRUPT_LEVEL, 2         /* Priority level for SPI interrupt */
