@@ -1,3 +1,4 @@
+.include "config.s"
     .section .text
     .global spi_init, spi_select_device, spi_deselect_device, spi_transmit_byte, spi_receive_byte, spi_transfer_byte, spi_check
 
@@ -111,3 +112,33 @@
         bne     transfer_loop        /* Continue until all bits are transferred */
         clr.b   %d0                  /* Indicate success */
         rts
+
+/* SPI Timeout and Error Checking */
+
+.global spi_transmit_byte_with_timeout, spi_receive_byte_with_timeout
+
+/* SPI Transmit with Timeout */
+spi_transmit_byte_with_timeout:
+    move.l #SPI_TIMEOUT_LIMIT, %d1           /* Load timeout limit */
+transmit_retry:
+    jsr spi_transmit_byte                    /* Attempt SPI transmit */
+    tst.b %d0                                /* Check if transmission was successful */
+    bne transmit_done                        /* If success, exit */
+    subq.l #1, %d1                           /* Decrement timeout counter */
+    bne transmit_retry                       /* Retry if timeout not reached */
+    move.l #SPI_ERROR_CODE, %d0              /* Set error code on timeout */
+transmit_done:
+    rts
+
+/* SPI Receive with Timeout */
+spi_receive_byte_with_timeout:
+    move.l #SPI_TIMEOUT_LIMIT, %d1           /* Load timeout limit */
+receive_retry:
+    jsr spi_receive_byte                     /* Attempt SPI receive */
+    tst.b %d0                                /* Check if reception was successful */
+    bne receive_done                         /* If success, exit */
+    subq.l #1, %d1                           /* Decrement timeout counter */
+    bne receive_retry                        /* Retry if timeout not reached */
+    move.l #SPI_ERROR_CODE, %d0              /* Set error code on timeout */
+receive_done:
+    rts

@@ -1,4 +1,4 @@
-
+.include "config.s"
 .section .text
 .global fat_init, fat_find_file, fat_read_file, fat_write_file, fat_list_directory
 

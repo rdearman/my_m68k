@@ -1,3 +1,4 @@
+.include "config.s"
 .section .text
 .global set_interface, write_stdout, write_stderr, read_stdin, mem_dump
 

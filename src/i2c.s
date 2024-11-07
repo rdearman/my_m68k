@@ -1,3 +1,4 @@
+.include "config.s"
 .section .text
 .global i2c_init, i2c_start, i2c_stop, i2c_write_byte, i2c_read_byte, i2c_check
 
@@ -126,4 +127,35 @@ i2c_read_loop:
 
 i2c_read_end:
     movem.l (%sp)+, %d0/%d1          /* Restore registers */
+    rts
+
+
+/* I2C Timeout and Error Checking */
+
+.global i2c_write_byte_with_timeout, i2c_read_byte_with_timeout
+
+/* I2C Write with Timeout */
+i2c_write_byte_with_timeout:
+    move.l #I2C_TIMEOUT_LIMIT, %d1           /* Load timeout limit */
+write_retry:
+    jsr i2c_write_byte                       /* Attempt I2C write */
+    tst.b %d0                                /* Check if write was successful */
+    bne write_done                           /* If success, exit */
+    subq.l #1, %d1                           /* Decrement timeout counter */
+    bne write_retry                          /* Retry if timeout not reached */
+    move.l #I2C_ERROR_CODE, %d0              /* Set error code on timeout */
+write_done:
+    rts
+
+/* I2C Read with Timeout */
+i2c_read_byte_with_timeout:
+    move.l #I2C_TIMEOUT_LIMIT, %d1           /* Load timeout limit */
+read_retry:
+    jsr i2c_read_byte                        /* Attempt I2C read */
+    tst.b %d0                                /* Check if read was successful */
+    bne read_done                            /* If success, exit */
+    subq.l #1, %d1                           /* Decrement timeout counter */
+    bne read_retry                           /* Retry if timeout not reached */
+    move.l #I2C_ERROR_CODE, %d0              /* Set error code on timeout */
+read_done:
     rts

@@ -1,3 +1,4 @@
+.include "config.s"
 .section .text
 .global lcd_init, lcd_send_command, lcd_send_data, lcd_set_cursor, lcd_clear_display, lcd_check
 .extern spi_transmit_byte

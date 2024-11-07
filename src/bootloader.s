@@ -1,3 +1,5 @@
+.include "config.s"
+
 .org 0x00000000
 .long 0x1400000     /* Initial Stack Pointer */
 .long _start    /* Start of bootloader code */

@@ -6,6 +6,21 @@
     .equ STACK_TOP_ADDR, 0x200000       /* Top of stack in RAM */
     .equ VECTOR_TABLE_ADDR, 0x00000000  /* Base address for interrupt vector table */
     .equ BOOTLOADER_ENTRY, 0x00000000   /* Bootloader start address */
+	
+	/* ===== VIA (W65C22N6TPG) Configuration ===== */
+	.equ VIA_BASE_ADDR, 0x300000              /* Base address for VIA */
+	.equ VIA_INTERRUPT_LEVEL, 3               /* Priority level for VIA interrupt */
+
+	/* Register offsets for VIA */
+	.equ VIA_DDRA, VIA_BASE_ADDR + 0x00       /* Data Direction Register A */
+	.equ VIA_DDRB, VIA_BASE_ADDR + 0x02       /* Data Direction Register B */
+	.equ VIA_ORA, VIA_BASE_ADDR + 0x04        /* Output Register A */
+	.equ VIA_ORB, VIA_BASE_ADDR + 0x06        /* Output Register B */
+	.equ VIA_IRB, VIA_BASE_ADDR + 0x07        /* Input Register B */
+	.equ VIA_ACR, VIA_BASE_ADDR + 0x0B        /* Auxiliary Control Register */
+	.equ VIA_PCR, VIA_BASE_ADDR + 0x0C        /* Peripheral Control Register */
+	.equ VIA_IFR, VIA_BASE_ADDR + 0x0D        /* Interrupt Flag Register */
+	.equ VIA_IER, VIA_BASE_ADDR + 0x0E        /* Interrupt Enable Register */	
 
     /* ===== UART Configuration ===== */
     .equ UART_BASE_ADDR, 0xC00000       /* UART base memory-mapped I/O address */
@@ -138,3 +153,9 @@
     .equ ERR_BROWNOUT_DETECTED, -112       /* Brownout condition detected */
 
 
+
+    /* ===== Timeout and Error Codes ===== */
+    .equ SPI_TIMEOUT_LIMIT, 1000            /* Arbitrary limit for SPI timeout */
+    .equ I2C_TIMEOUT_LIMIT, 1000            /* Arbitrary limit for I2C timeout */
+    .equ SPI_ERROR_CODE, -1                 /* Error code for SPI failure */
+    .equ I2C_ERROR_CODE, -1                 /* Error code for I2C failure */

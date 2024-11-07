@@ -1,3 +1,4 @@
+.include "config.s"
 	.section .text
 	.global sd_init, sd_check, sd_read_block, sd_write_block
 

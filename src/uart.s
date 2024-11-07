@@ -1,3 +1,4 @@
+.include "config.s"
 .section .text
 .global uart_init, uart_send_byte, uart_receive_byte, uart_check
 #ifdef QEMU
@@ -65,4 +66,28 @@ wait_receive_loop:
     bra     uart_fail            /* If timeout reached, branch to error handler */
 
 wait_receive_done:
+    rts
+
+/* UART Receive with Flow Control */
+uart_receive_byte_with_flow:
+    /* Hardware flow control - Assert RTS to signal ready to receive */
+    bset    #0, UART_RTS_REG                 /* Set RTS (Ready to Receive) */
+    
+    /* Wait for data */
+uart_receive_wait:
+    btst    #0, UART_DATA_REG                /* Check if data is available */
+    beq     uart_receive_wait                /* Wait if no data */
+    
+    /* Read received byte */
+    move.b UART_DATA_REG, %d0                /* Load received byte into %d0 */
+    
+    /* Software flow control - Send XOFF if buffer is full */
+    cmp.b   #XOFF, %d0
+    bne     uart_receive_done
+    move.b  #XOFF, UART_DATA_REG             /* Send XOFF to pause sending from remote */
+    rts
+
+uart_receive_done:
+    /* Hardware flow control - Clear RTS to stop receiving */
+    bclr    #0, UART_RTS_REG                 /* Clear RTS */
     rts

@@ -28,8 +28,8 @@ endif
 
 # Directories
 SRC_DIR := src
-BUILD_DIR := ./build
-BIN_DIR := ./bin
+BUILD_DIR := build
+BIN_DIR := bin
 
 # Source files
 BOOTLOADER_SRC := $(SRC_DIR)/bootloader.s
@@ -72,11 +72,11 @@ bootloader: $(BOOTLOADER_ELF) $(BOOTLOADER_BIN_HIGH) $(BOOTLOADER_BIN_LOW)
 
 # Compile bootloader source
 $(BOOTLOADER_OBJ): $(BOOTLOADER_SRC) | $(BUILD_DIR)
-	$(AS) --defsym MONITOR_ENTRY=$(MONITOR_ENTRY) --defsym QEMU=$(QEMU) $(CFLAGS)  -o "$@" "$<"
+	$(AS) -I $(SRC_DIR) --defsym MONITOR_ENTRY=$(MONITOR_ENTRY) --defsym QEMU=$(QEMU) $(CFLAGS)  -o "$@" "$<"
 
 # Compile each common object file in COMMON_SRC
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s | $(BUILD_DIR)
-	$(AS) --defsym MONITOR_ENTRY=$(MONITOR_ENTRY) --defsym QEMU=$(QEMU) $(CFLAGS) -o "$@" "$<"
+	$(AS) -I $(SRC_DIR) --defsym MONITOR_ENTRY=$(MONITOR_ENTRY) --defsym QEMU=$(QEMU) $(CFLAGS) -o "$@" "$<"
 
 # Link the ELF file
 $(BOOTLOADER_ELF): $(BOOTLOADER_OBJ) $(COMMON_OBJ) | $(BIN_DIR)

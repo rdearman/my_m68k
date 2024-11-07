@@ -1,3 +1,4 @@
+.include "config.s"
 .section .text
 .global _start
 .global init_interrupt_vectors, central_interrupt_handler

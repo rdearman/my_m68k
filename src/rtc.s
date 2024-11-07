@@ -1,3 +1,4 @@
+.include "config.s"
 .section .text
 .global rtc_init, rtc_read_time, rtc_set_time, rtc_set_alarm, rtc_get_timestamp, rtc_check
 .extern i2c_start, i2c_stop, i2c_write_byte, i2c_read_byte
