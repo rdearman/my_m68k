@@ -11,6 +11,8 @@ ifeq ($(OS),Windows_NT)
     # Define PowerShell commands for Windows
     CREATE_BOOTLOADER_HIGH = powershell -Command "(Get-Content -Path bin/bootloader.bin -Encoding Byte)[1..2] | Set-Content -Path bin/bootloader_high.bin -Encoding Byte"
     CREATE_BOOTLOADER_LOW = powershell -Command "(Get-Content -Path bin/bootloader.bin -Encoding Byte)[0..1] | Set-Content -Path bin/bootloader_low.bin -Encoding Byte"
+    RM = powershell -Command "Remove-Item -Recurse -Force"
+	MK = powershell -Command "New-Item -ItemType Directory -Path"
 else
     AS = m68k-linux-gnu-as
     LD = m68k-linux-gnu-ld
@@ -19,12 +21,15 @@ else
     # Define dd commands for Unix-based systems
     CREATE_BOOTLOADER_HIGH = dd if=bin/bootloader.bin of=bin/bootloader_high.bin bs=1 skip=1 count=2
     CREATE_BOOTLOADER_LOW = dd if=bin/bootloader.bin of=bin/bootloader_low.bin bs=1 skip=0 count=2
+	RM = rm -rf
+	MK = mkdir 
+    NULLDEV = /dev/null
 endif
 
 # Directories
 SRC_DIR := src
-BUILD_DIR := build
-BIN_DIR := bin
+BUILD_DIR := ./build
+BIN_DIR := ./bin
 
 # Source files
 BOOTLOADER_SRC := $(SRC_DIR)/bootloader.s
@@ -87,13 +92,14 @@ $(BOOTLOADER_BIN_HIGH): $(BOOTLOADER_BIN)
 $(BOOTLOADER_BIN_LOW): $(BOOTLOADER_BIN)
 	$(CREATE_BOOTLOADER_LOW)
 
-# Ensure build and bin directories exist
+#Ensure build and bin directories exist
 $(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+	$(MK) $(BUILD_DIR)
 
 $(BIN_DIR):
-	mkdir -p $(BIN_DIR)
+	$(MK) $(BIN_DIR)
 
 clean:
-	rm -rf $(BUILD_DIR)/* $(BIN_DIR)/*
+	$(RM) $(BUILD_DIR)
+	$(RM) $(BIN_DIR)
 	find . -name '*~' -type f -delete
