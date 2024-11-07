@@ -137,3 +137,36 @@ I'm not really taking contributions because this is mainly a learning exercise f
 ---
 
 Enjoy diving into the world of retro computing with the Motorola 68000!
+
+## Memory Map
+
+This section defines the memory layout for the Motorola 68000 homebrew computer project, detailing the locations of RAM, ROM, stack, and memory-mapped I/O devices.
+
+| Multiplexer Output | Address Range / Device            | Description                                      |
+|--------------------|-----------------------------------|--------------------------------------------------|
+| `Y1 (0001)`        | D43256C (RAM)                    | Lower RAM device                                 |
+| `Y2 (0010)`        | W65C22N6TPG (VIA Chip) CS1       | First chip select for VIA                        |
+| `Y3 (0011)`        | W65C22N6TPG (VIA Chip) CS2       | Second chip select for VIA                       |
+| `Y4 (0100)`        | M82C51A (UART) WR                | Write line for UART                              |
+| `Y5 (0101)`        | M82C51A (UART) RD                | Read line for UART                               |
+| `Y6 (0110)`        | CD74HCT245P (Data Bus Transceiver) | Controls data flow direction                     |
+
+| Address Range        | Description                        |
+|----------------------|------------------------------------|
+| `0x00000000` - `0x000FFFFF` | **ROM** - Bootloader, OS, and monitor program |
+| `0x00100000` - `0x001FFFFF` | **RAM** - General-purpose RAM for program data |
+| `0x00200000`               | **Stack Top** - Top of the stack |
+| `0xC00000`                 | **UART Base** - M82C51A memory-mapped address |
+| `0xC00020`                 | **SPI Base** - SPI peripheral interface |
+| `0xC00040`                 | **I2C Base** - I2C peripheral interface |
+| `Y1 - Y6`                  | **GPIO and Chip Selects** - Managed by MM74HC154N |
+
+### Notes
+- **ROM** holds the bootloader, OS, and monitor programs, occupying the first 1MB.
+- **RAM** is in the next 1MB for general program data.
+- **Stack Top** is located at `0x200000`.
+- **VIA Chip**: Accessed via CS1 and CS2 lines, allowing for multiple chip select options for expanded I/O capabilities.
+- **UART (M82C51A)**: Separate read (`Y5`) and write (`Y4`) lines for controlled data access.
+- **Data Bus Transceiver (CD74HCT245P)**: Controlled via `Y6` to manage data direction between the CPU and peripherals.
+
+This detailed map provides a clear structure of memory addresses and device-specific mappings, critical for understanding address space and device handling.
