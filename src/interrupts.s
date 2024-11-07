@@ -109,7 +109,7 @@ end_interrupt:
 
 /* ========== Default Interrupt Handlers ========== */
 
-_int_start:
+_init_start:
     jmp main                         /* Main entry point */
 
 _initial_sp:
