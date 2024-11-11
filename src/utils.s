@@ -144,7 +144,12 @@ int_to_hex:
     int_to_hex_loop:
         move.l %d0, %d2               /* Copy input integer to %d2 */
         and.l #0xF0000000, %d2        /* Mask the highest nibble */
-        lsr.l #28, %d2                /* Shift to lower 4 bits */
+	#        lsr.l #28, %d2                /* Shift to lower 4 bits */
+	lsr.l #8, %d2
+	lsr.l #8, %d2
+	lsr.l #8, %d2
+	lsr.l #4, %d2   /* Total shift of 28 bits */
+
         add.b #'0', %d2               /* Convert to ASCII '0'..'9' */
         cmp.b #9, %d2                 /* If > 9, convert to 'A'..'F' */
         ble int_to_hex_skip
@@ -167,7 +172,9 @@ int_to_dec:
     movea.l %sp, %a1                  /* Temporary buffer in %a1 */
 int_to_dec_loop:
     divu %d2, %d3                     /* Divide integer by 10, quotient in %d3 */
-    mulu #10, %d3, %d1                /* Multiply quotient to restore remainder */
+    move.l %d3, %d1     /* Copy %d3 into %d1 */
+    mulu #10, %d1       /* Multiply %d1 by 10 */
+    # mulu #10, %d3, %d1                /* Multiply quotient to restore remainder */
     sub.l %d1, %d0                    /* Remainder in %d0 */
     add.b #'0', %d0                   /* Convert remainder to ASCII */
     move.b %d0, (%a1)+                /* Store in buffer */
