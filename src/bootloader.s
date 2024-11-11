@@ -68,6 +68,14 @@ done_print:
 /* Bootloader entry point */
 _start:
     move.l  #0x200000, %a7  /* Set up stack pointer to top of RAM */
+	
+	jsr uart_init          /* Initialise UART for QEMU output */
+
+    /* Add further initialisation steps here
+    jsr spi_init
+    jsr i2c_init
+    jsr rtc_check
+	 */
 	/* Clear registers */
 	move.l #0, %d0            /* Load the index of the message (e.g., 0 for "Clearing Memory")*/
     jsr print_message         /* Print the message at messages[0] */
