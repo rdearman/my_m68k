@@ -1,7 +1,8 @@
 .include "config.s"
 
 .org 0x00000000
-.long 0x1400000     /* Initial Stack Pointer */
+.long 0x40800000
+#.long 0x1400000     /* Initial Stack Pointer */
 .long _start    /* Start of bootloader code */
 
 .section .data            /* Declare data section explicitly */
@@ -42,34 +43,15 @@ MONITOR_ENTRY:
     jmp _idle_loop
 .endif
 	
-print_message:
-/* 
-    This section performs the following:
-    1. Copies the index to a data register.
-    2. Multiplies the index by 4 to access the correct pointer in the messages array.
-    3. Loads the address of the message into the address register a0.
-*/
-	move.l %d0, %d1
-	lsl.l  #2, %d1
-	movea.l %d1, %a1
-	move.l messages(%a1), %a0
-
-
-print_loop:
-    move.b (%a0)+, %d1               /* Load next byte of the message into %d1  */
-    beq done_print                   /* If null terminator, were done  */
-    jsr uart_send_byte               /* Call uart_send_byte to send character in %d1  */
-    bra print_loop                   /* Repeat for next character  */
-
-done_print:
-    rts                               /* Return from subroutine */
-	
-	
 /* Bootloader entry point */
 _start:
-    move.l  #0x200000, %a7  /* Set up stack pointer to top of RAM */
-	
-	jsr uart_init          /* Initialise UART for QEMU output */
+	#move.l  #0x200000, %a7  /* Set up stack pointer to top of RAM */
+	move.l  #0x40800000, %sp  /* Set up stack pointer to top of RAM */
+    move.l  #after_uart_init, -(%sp)   /* Manually push return address onto the stack */
+    jsr     uart_init                  /* Call uart_init using jsr */
+    addq.l  #4, %sp                    /* Clean up the stack after jsr */
+after_uart_init:	
+	# bsr uart_init          /* Initialise UART for QEMU output */
 
     /* Add further initialisation steps here
     jsr spi_init
@@ -77,6 +59,7 @@ _start:
     jsr rtc_check
 	 */
 	/* Clear registers */
+
 	move.l #0, %d0            /* Load the index of the message (e.g., 0 for "Clearing Memory")*/
     jsr print_message         /* Print the message at messages[0] */
     clr.l %d0
@@ -241,3 +224,26 @@ address_test_loop:
 _idle_loop:
     bra _idle_loop
 
+	
+print_message:
+/* 
+    This section performs the following:
+    1. Copies the index to a data register.
+    2. Multiplies the index by 4 to access the correct pointer in the messages array.
+    3. Loads the address of the message into the address register a0.
+*/
+	move.l %d0, %d1
+	lsl.l  #2, %d1
+	movea.l %d1, %a1
+	move.l messages(%a1), %a0
+
+
+print_loop:
+    move.b (%a0)+, %d1               /* Load next byte of the message into %d1  */
+    beq done_print                   /* If null terminator, were done  */
+    jsr uart_send_byte               /* Call uart_send_byte to send character in %d1  */
+    bra print_loop                   /* Repeat for next character  */
+
+done_print:
+    rts                               /* Return from subroutine */
+	

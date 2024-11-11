@@ -2,7 +2,7 @@
 .section .text
 .global uart_init, uart_send_byte, uart_receive_byte, uart_check
 #ifdef QEMU
-    .equ UART_DATA_REG, 0x10000000  /* QEMU UART address */
+    .equ UART_DATA_REG, 0x40000200
 #else
     .equ UART_DATA_REG, 0x400000    /* Real hardware UART address */
 #endif
