@@ -25,7 +25,7 @@
     /* ===== UART Configuration ===== */
     .equ UART_BASE_ADDR, 0xC00000       /* UART base memory-mapped I/O address */
     .equ UART_INTERRUPT_LEVEL, 1        /* Priority level for UART interrupt */
-    .equ UART_BAUD_RATE, 9600           /* UART baud rate setting */
+    .equ UART_BAUD_RATE, 19200			/* UART baud rate setting */
     .equ UART_CTRL_REG, UART_BASE_ADDR + 0x02 /* UART control register offset */
     .equ UART_STATUS_REG, UART_BASE_ADDR + 0x04 /* UART status register offset */
 
