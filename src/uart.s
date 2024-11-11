@@ -1,18 +1,23 @@
 .include "config.s"
 .section .text
-.global uart_init, uart_send_byte, uart_receive_byte, uart_check
+.global uart_init, uart_send_byte, uart_receive_byte, uart_check, set_baud_rate
 #ifdef QEMU
     .equ UART_DATA_REG, 0x40000200
 #else
     .equ UART_DATA_REG, 0x400000    /* Real hardware UART address */
 #endif
 
-	/* Bad Actor */
+/* Define offsets relative to the base UART_DATA_REG */
+.equ UART_CONTROL_REG, UART_DATA_REG + 2 /* Control register offset */
+.equ UART_BAUD_REG, UART_DATA_REG + 4    /* Baud rate register offset */
+
 /* UART Initialisation Routine */
 uart_init:
-    move.b  #0x03, UART_DATA_REG+2       /* Set UART control register for 8N1, no parity */
-    move.b  #0x05, UART_DATA_REG+4       /* Set UART baud rate to desired value */
+    move.b  #0x03, UART_CONTROL_REG      /* Set UART control register for 8N1, no parity */
+    move.l #DEFAULT_BAUD_RATE, UART_BAUD_REG        /* Load default baud rate (19200) into D0 */
+    # jsr set_baud_rate                    /* Set the default baud rate */
     rts
+
 
 /* UART Self-Check Routine */
 uart_check:
@@ -41,15 +46,6 @@ uart_receive_byte:
     jsr uart_wait_receive        /* Use shared receive wait routine */
     move.b UART_DATA_REG, %d1         /* Move received byte from UART data register to %d1 */
     rts
-
-uart_wait_transmit:
-    move.l #10000, %d2                /* Set a timeout counter */
-wait_transmit_done:
-    btst    #5, UART_STATUS_REG       /* Test if the transmit buffer is ready (check bit 5) */
-    beq     wait_transmit_done        /* Loop until buffer is ready */
-    dbra    %d2, wait_transmit_done   /* Decrement timeout counter */
-    rts                                /* Return when ready or on timeout */
-
 
 /* Helper routine to wait for UART transmit buffer to be ready */
 uart_wait_transmit:

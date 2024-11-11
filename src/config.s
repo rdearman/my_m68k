@@ -1,7 +1,6 @@
     /* config.s: Common Definitions and Constants File */
 
     /* ===== Memory Addresses ===== */
-	/* Bad Actor */
     .equ ROM_BASE_ADDR, 0x00000000      /* Base address of ROM */
     .equ RAM_BASE_ADDR, 0x00100000      /* Base address of RAM */
     .equ STACK_TOP_ADDR, 0x200000       /* Top of stack in RAM */
@@ -25,9 +24,11 @@
 	.equ VIA_T2C_L, VIA_BASE_ADDR + 0x0F        /* Timer 2 Address */
 
     /* ===== UART Configuration ===== */
+    .equ CLOCK_FREQ, 8000000           /* System clock frequency in Hz */
     .equ UART_BASE_ADDR, 0xC00000       /* UART base memory-mapped I/O address */
     .equ UART_INTERRUPT_LEVEL, 1        /* Priority level for UART interrupt */
     .equ UART_BAUD_RATE, 19200			/* UART baud rate setting */
+	.equ DEFAULT_BAUD_RATE, UART_BAUD_RATE      /* Default baud rate in bps */
     .equ UART_CTRL_REG, UART_BASE_ADDR + 0x02 /* UART control register offset */
     .equ UART_STATUS_REG, UART_BASE_ADDR + 0x04 /* UART status register offset */
 
