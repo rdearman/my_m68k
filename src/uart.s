@@ -7,7 +7,7 @@
     .equ UART_DATA_REG, 0x400000    /* Real hardware UART address */
 #endif
 
-
+	/* Bad Actor */
 /* UART Initialisation Routine */
 uart_init:
     move.b  #0x03, UART_DATA_REG+2       /* Set UART control register for 8N1, no parity */
