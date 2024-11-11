@@ -42,6 +42,15 @@ uart_receive_byte:
     move.b UART_DATA_REG, %d1         /* Move received byte from UART data register to %d1 */
     rts
 
+uart_wait_transmit:
+    move.l #10000, %d2                /* Set a timeout counter */
+wait_transmit_done:
+    btst    #5, UART_STATUS_REG       /* Test if the transmit buffer is ready (check bit 5) */
+    beq     wait_transmit_done        /* Loop until buffer is ready */
+    dbra    %d2, wait_transmit_done   /* Decrement timeout counter */
+    rts                                /* Return when ready or on timeout */
+
+
 /* Helper routine to wait for UART transmit buffer to be ready */
 uart_wait_transmit:
     move.l #10000, %d2           /* Timeout counter */

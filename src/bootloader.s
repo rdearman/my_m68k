@@ -47,11 +47,11 @@ MONITOR_ENTRY:
 _start:
 	#move.l  #0x200000, %a7  /* Set up stack pointer to top of RAM */
 	move.l  #0x40800000, %sp  /* Set up stack pointer to top of RAM */
-    move.l  #after_uart_init, -(%sp)   /* Manually push return address onto the stack */
+
     jsr     uart_init                  /* Call uart_init using jsr */
-    addq.l  #4, %sp                    /* Clean up the stack after jsr */
-after_uart_init:	
-	# bsr uart_init          /* Initialise UART for QEMU output */
+
+    move.b  #'A', %d1                /* Load ASCII 'A' into %d1 */
+    jsr     uart_send_byte           /* Send character over UART */
 
     /* Add further initialisation steps here
     jsr spi_init

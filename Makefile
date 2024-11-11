@@ -1,5 +1,4 @@
 # Toolchain
-
 CFLAGS := -m68000 -g
 
 # Check if running on Windows
@@ -104,3 +103,5 @@ clean:
 	$(RM) $(BUILD_DIR)
 	$(RM) $(BIN_DIR)
 	find . -name '*~' -type f -delete
+	
+nothing:
