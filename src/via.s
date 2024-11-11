@@ -1,7 +1,7 @@
 .include "config.s"
 .section .text
 .global via_init
-
+	/* Bad Actor */
 #ifdef QEMU
     .ascii "Compiling for QEMU\n"
 #else

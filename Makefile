@@ -104,4 +104,3 @@ clean:
 	$(RM) $(BIN_DIR)
 	find . -name '*~' -type f -delete
 	
-nothing:

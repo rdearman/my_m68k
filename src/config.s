@@ -1,6 +1,7 @@
     /* config.s: Common Definitions and Constants File */
 
     /* ===== Memory Addresses ===== */
+	/* Bad Actor */
     .equ ROM_BASE_ADDR, 0x00000000      /* Base address of ROM */
     .equ RAM_BASE_ADDR, 0x00100000      /* Base address of RAM */
     .equ STACK_TOP_ADDR, 0x200000       /* Top of stack in RAM */
