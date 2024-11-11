@@ -60,6 +60,7 @@ else
     QEMU = 0
 endif
 
+
 # Linker flags
 BOOTLOADER_LD_FLAGS := -Ttext=0x000000
 

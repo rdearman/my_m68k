@@ -21,6 +21,7 @@
 	.equ VIA_PCR, VIA_BASE_ADDR + 0x0C        /* Peripheral Control Register */
 	.equ VIA_IFR, VIA_BASE_ADDR + 0x0D        /* Interrupt Flag Register */
 	.equ VIA_IER, VIA_BASE_ADDR + 0x0E        /* Interrupt Enable Register */	
+	.equ VIA_T2C_L, VIA_BASE_ADDR + 0x0F        /* Timer 2 Address */
 
     /* ===== UART Configuration ===== */
     .equ UART_BASE_ADDR, 0xC00000       /* UART base memory-mapped I/O address */
