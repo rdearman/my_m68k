@@ -8,6 +8,17 @@ DEBUG_UART   =   0
 DEBUG_LCD    =  1
 DEBUG_MODVGA = 2
 
+.global report_error
+report_error:
+    /* %d0 should hold the error code */
+    cmp.b DEBUG_UART, debug_output_device
+    beq uart_send_message    /* Send message to UART */
+    cmp.b DEBUG_LCD, debug_output_device
+    beq lcd_send_message     /* Send message to LCD */
+    cmp.b DEBUG_MODVGA, debug_output_device
+    beq modvga_display_error /* Send message to MOD-VGA */
+    rts
+	
 
 /* Default debug output device */
 	.align 2
