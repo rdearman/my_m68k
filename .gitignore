@@ -3,3 +3,18 @@ build/
 
 # Ignore everything in the bin directory
 bin/
+
+# Ignore Python scripts
+*.py
+
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore environment files
+.env
+.venv/
+
+# Ignore system files
+.DS_Store
+Thumbs.db

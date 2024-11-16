@@ -8,18 +8,6 @@
 	DEBUG_LCD    =  1
 	DEBUG_MODVGA = 2
 
-.global report_error
-report_error:
-	/* %d0 should hold the error code */
-	cmp.b DEBUG_UART, debug_output_device
-	beq uart_send_message    /* Send message to UART */
-	cmp.b DEBUG_LCD, debug_output_device
-	beq lcd_send_message     /* Send message to LCD */
-	cmp.b DEBUG_MODVGA, debug_output_device
-	beq modvga_display_error /* Send message to MOD-VGA */
-	rts
-
-
 	/* Default debug output device */
 	.align 2
 debug_output_device: .byte DEBUG_UART  /* Default to UART */
@@ -36,16 +24,19 @@ set_debug_output:
 	Outputs an error message to the selected debug output.
 	*/
 	.align 2
+
+
 report_error:
-	/* Load the error message prefix */
-	move.l #error_prefix, %a0
-	jsr print_message                  /* Print "Error: " prefix */
-
-	/* Load and print the error code */
-	move.b %d0, %d1                    /* Copy error code to %d1 for output */
-	jsr print_error_code               /* Print the error code */
-
+	/* %d0 should hold the error code */
+	move.b debug_output_device, %d1   /* Load debug_output_device into D1 */
+	cmpi.b #DEBUG_UART, %d1           /* Compare with DEBUG_UART */
+	beq uart_send_message             /* Send message to UART */
+	cmpi.b #DEBUG_LCD, %d1            /* Compare with DEBUG_LCD */
+	beq lcd_send_message              /* Send message to LCD */
+	cmpi.b #DEBUG_MODVGA, %d1         /* Compare with DEBUG_MODVGA */
+	beq modvga_display_error          /* Send message to MOD-VGA */
 	rts
+
 
 	/* Helper function to print a message to the current debug output */
 	.align 2
@@ -202,3 +193,6 @@ int_to_dec_copy:
 	move.b #0, (%a0)                  /* Null-terminate string */
 	lea 12(%sp), %sp                  /* Restore stack */
 	rts
+
+modvga_display_error:
+	rts  /* Add functionality here */

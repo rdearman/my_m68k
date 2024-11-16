@@ -32,6 +32,26 @@ spi_init:
 	move.b  #ERR_SUCCESS, %d0         /* Return success */
 	rts
 
+	/* SPI Check Routine */
+spi_check:
+	lea     VIA_ORB, %a0           /* Load base address for VIA Output Register B (SPI control lines) */
+	move.b  (%a0), %d0             /* Read current state of Port B */
+	andi.b  #0x07, %d0             /* Mask PB0-PB2 (SPI Chip Select, Clock, and Data lines) */
+	cmpi.b  #0x07, %d0             /* Compare to expected idle state (e.g., all high) */
+	bne     spi_check_fail         /* Branch if SPI lines are not idle */
+
+	/* Optionally, perform a test transfer */
+	move.b  #0xFF, (%a0)           /* Send a test byte (0xFF) */
+	jsr     spi_transfer_byte      /* Call SPI transfer routine */
+	cmpi.b  #0xFF, %d0             /* Check if returned byte matches sent byte */
+	bne     spi_check_fail         /* Branch if transfer failed */
+
+	rts                             /* Return success if all checks passed */
+
+spi_check_fail:
+	move.l  #ERR_INITIALISATION_FAIL, %d0 /* Set failure code */
+	rts                             /* Return failure */
+
 spi_init_fail:
 	move.b  #ERR_SPI_INIT_FAIL, %d0   /* Return failure code */
 	jsr report_error                  /* Log the initialisation failure */

@@ -1,3 +1,5 @@
+.include "config.s"
+
 	/* VIA Initialisation Code */
 .global via_init
 via_init:
