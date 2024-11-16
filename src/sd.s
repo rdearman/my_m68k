@@ -4,28 +4,28 @@
 
 	/* Low-Level SD Card Initialisation */
 sd_init:
-	    /* 
-       Send commands to put SD card into SPI mode and prepare for FAT access.
-       Typical commands here might include CMD0, CMD8, and others to initialise.
-       The exact steps will depend on your SD card’s specifications.
+	/*
+	Send commands to put SD card into SPI mode and prepare for FAT access.
+	Typical commands here might include CMD0, CMD8, and others to initialise.
+	The exact steps will depend on your SD card’s specifications.
 	*/
 	rts
 
 	/* Low-Level Function for Reading a Disk Block */
 sd_read_block:
-	    /*
-       Read a 512-byte block from a specified sector on the SD card.
-       Sector address provided in %d0.
-       This function should read the block and store it in memory.
+	/*
+	Read a 512-byte block from a specified sector on the SD card.
+	Sector address provided in %d0.
+	This function should read the block and store it in memory.
 	*/
 	rts
 
 	/* Low-Level Function for Writing a Disk Block */
 sd_write_block:
-	    /*
-       Write a 512-byte block to a specified sector on the SD card.
-       Sector address provided in %d0.
-       This function should write the block from memory to the SD card.
+	/*
+	Write a 512-byte block to a specified sector on the SD card.
+	Sector address provided in %d0.
+	This function should write the block from memory to the SD card.
 	*/
 	rts
 
@@ -40,4 +40,4 @@ sd_check:
 sd_check_pass:
 	clr.l   %d0                       /* Return success code */
 	rts
-	
+

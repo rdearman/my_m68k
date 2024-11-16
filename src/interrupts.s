@@ -3,64 +3,64 @@
 .global enable_interrupts, disable_interrupts
 .extern uart_isr, spi_isr, i2c_isr  /* External ISRs for specific devices */
 
-    /* Enable global interrupts */
+	/* Enable global interrupts */
 enable_interrupts:
-    move.w  #0x2000, %sr            /* Clear interrupt mask */
-    rts
+	move.w  #0x2000, %sr            /* Clear interrupt mask */
+	rts
 
-    /* Disable global interrupts */
+	/* Disable global interrupts */
 disable_interrupts:
-    move.w  #0x2700, %sr            /* Set interrupt mask to disable interrupts */
-    rts
+	move.w  #0x2700, %sr            /* Set interrupt mask to disable interrupts */
+	rts
 
-    /* Initialise Interrupt Vector Table */
+	/* Initialise Interrupt Vector Table */
 init_interrupt_vectors:
-    lea vector_table, %a0          /* Base address of the vector table */
-    move.l  #central_interrupt_handler, (%a0) /* Set central interrupt handler */
-    addq.l  #4, %a0
-    move.l  #uart_isr, (%a0)       /* UART interrupt vector */
-    addq.l  #4, %a0
-    move.l  #spi_isr, (%a0)        /* SPI interrupt vector */
-    addq.l  #4, %a0
-    move.l  #i2c_isr, (%a0)        /* I2C interrupt vector */
-    rts
+	lea vector_table, %a0          /* Base address of the vector table */
+	move.l  #central_interrupt_handler, (%a0) /* Set central interrupt handler */
+	addq.l  #4, %a0
+	move.l  #uart_isr, (%a0)       /* UART interrupt vector */
+	addq.l  #4, %a0
+	move.l  #spi_isr, (%a0)        /* SPI interrupt vector */
+	addq.l  #4, %a0
+	move.l  #i2c_isr, (%a0)        /* I2C interrupt vector */
+	rts
 
-    /* Central Interrupt Handler */
+	/* Central Interrupt Handler */
 central_interrupt_handler:
-    movem.l %d0-%d7/%a0-%a6, -(%sp)  /* Preserve registers */
-    cmpi.b  #1, %d0                  /* Check if UART interrupt (priority 1) */
-    beq handle_uart_interrupt
-    cmpi.b  #2, %d0                  /* Check if SPI interrupt (priority 2) */
-    beq handle_spi_interrupt
-    cmpi.b  #3, %d0                  /* Check if I2C interrupt (priority 3) */
-    beq handle_i2c_interrupt
-    movem.l (%sp)+, %d0-%d7/%a0-%a6  /* Restore registers */
-    rte                              /* Return if no known interrupt */
+	movem.l %d0-%d7/%a0-%a6, -(%sp)  /* Preserve registers */
+	cmpi.b  #1, %d0                  /* Check if UART interrupt (priority 1) */
+	beq handle_uart_interrupt
+	cmpi.b  #2, %d0                  /* Check if SPI interrupt (priority 2) */
+	beq handle_spi_interrupt
+	cmpi.b  #3, %d0                  /* Check if I2C interrupt (priority 3) */
+	beq handle_i2c_interrupt
+	movem.l (%sp)+, %d0-%d7/%a0-%a6  /* Restore registers */
+	rte                              /* Return if no known interrupt */
 
 handle_uart_interrupt:
-    jsr uart_isr                     /* Call UART handler */
-    bra end_interrupt
+	jsr uart_isr                     /* Call UART handler */
+	bra end_interrupt
 
 handle_spi_interrupt:
-    jsr spi_isr                      /* Call SPI handler */
-    bra end_interrupt
+	jsr spi_isr                      /* Call SPI handler */
+	bra end_interrupt
 
 handle_i2c_interrupt:
-    jsr i2c_isr                      /* Call I2C handler */
+	jsr i2c_isr                      /* Call I2C handler */
 
 end_interrupt:
-    movem.l (%sp)+, %d0-%d7/%a0-%a6  /* Restore registers */
-    rte                              /* Return from interrupt */
+	movem.l (%sp)+, %d0-%d7/%a0-%a6  /* Restore registers */
+	rte                              /* Return from interrupt */
 
 .section .vectors, "ax"              /* Define the vector section */
 
 .org 0x000000                        /* Set the origin to the start of the vector table */
 
-    /* Reset Vectors */
+	/* Reset Vectors */
     .long _initial_sp                /* Vector 0: Initial Stack Pointer (SSP) */
     .long _start                     /* Vector 1: Initial Program Counter (PC) */
 
-    /* Exception Vectors */
+	/* Exception Vectors */
     .long _bus_error                 /* Vector 2: Bus error */
     .long _address_error             /* Vector 3: Address error */
     .long _illegal_inst              /* Vector 4: Illegal instruction / BKPT */
@@ -76,7 +76,7 @@ end_interrupt:
     .long _format_error              /* Vector 14: Format error */
     .long _uninit_vector             /* Vector 15: Uninitialised interrupt vector */
 
-    /* Level 1 - Level 7 Autovectors */
+	/* Level 1 - Level 7 Autovectors */
     .long _spurious_interrupt        /* Vector 24: Spurious interrupt */
     .long _level1_autovector         /* Vector 25: Level 1 autovector */
     .long _level2_autovector         /* Vector 26: Level 2 autovector */
@@ -86,109 +86,109 @@ end_interrupt:
     .long _level6_autovector         /* Vector 30: Level 6 autovector */
     .long _level7_autovector         /* Vector 31: Level 7 autovector */
 
-    /* TRAP #0-15 Instructions */
+	/* TRAP #0-15 Instructions */
     .rept 16                         /* Repeat 16 times for TRAP vectors 32-47 */
         .long _trap                  /* Trap handler */
     .endr
 
-    /* Floating-Point Coprocessor Errors (48-54) */
+	/* Floating-Point Coprocessor Errors (48-54) */
     .rept 7
         .long _fpu_error             /* FPU error handler */
     .endr
 
-    /* Memory Management Errors (56-58) */
+	/* Memory Management Errors (56-58) */
     .long _mmu_error                 /* Vector 56: MMU error */
     .long _mmu_error                 /* Vector 57: MMU error */
     .long _mmu_error                 /* Vector 58: MMU error */
 
-    /* User Device Interrupts */
+	/* User Device Interrupts */
     .org 0x00000100                  /* Start user device interrupt vector area */
     .rept 192                        /* User device vectors (64-255) */
         .long _user_int              /* Placeholder handler for user interrupts */
     .endr
 
-/* ========== Default Interrupt Handlers ========== */
+	/* ========== Default Interrupt Handlers ========== */
 
 _init_start:
-    jmp main                         /* Main entry point */
+	jmp main                         /* Main entry point */
 
 _initial_sp:
     .long 0x200000                   /* Top of RAM stack pointer */
 
 _bus_error:
-    rte
+	rte
 
 _address_error:
-    rte
+	rte
 
 _illegal_inst:
-    rte
+	rte
 
 _zero_divide:
-    rte
+	rte
 
 _chk_inst:
-    rte
+	rte
 
 _trapcc:
-    rte
+	rte
 
 _priv_violation:
-    rte
+	rte
 
 _trace:
-    rte
+	rte
 
 _line_1010:
-    rte
+	rte
 
 _line_1111:
-    rte
+	rte
 
 _reserved:
-    rte
+	rte
 
 _coproto_violation:
-    rte
+	rte
 
 _format_error:
-    rte
+	rte
 
 _uninit_vector:
-    rte
+	rte
 
 _spurious_interrupt:
-    rte
+	rte
 
 _level1_autovector:
-    rte
+	rte
 
 _level2_autovector:
-    rte
+	rte
 
 _level3_autovector:
-    rte
+	rte
 
 _level4_autovector:
-    rte
+	rte
 
 _level5_autovector:
-    rte
+	rte
 
 _level6_autovector:
-    rte
+	rte
 
 _level7_autovector:
-    rte
+	rte
 
 _fpu_error:
-    rte
+	rte
 
 _mmu_error:
-    rte
+	rte
 
 _trap:
-    rte
+	rte
 
 _user_int:
-    rte
+	rte
