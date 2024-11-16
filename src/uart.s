@@ -28,6 +28,12 @@ select_channel:
     rts
 
 /* Delay subroutine */
+/*
+Total Loop Timing @ 8mhz:
+
+100 iterations × 18 cycles = 1800 clock cycles.
+1800 cycles × 125 ns = 225 µs total delay.
+*/
 uart_delay:
     move.l  #100, %d0            /* Adjust the loop counter based on timing requirements */
 delay_loop:
