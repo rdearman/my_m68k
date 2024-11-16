@@ -1,6 +1,7 @@
 .include "config.s"
 .section .text
 .global uart_init, uart_send_byte, uart_receive_byte, uart_check, set_baud_rate
+.global uart_send_string
 
 /* Base address for the SCC2692 DUART */
 .equ UART_BASE, 0x40000000
@@ -42,6 +43,20 @@ uart_check:
 uart_fail:
     move.l  #1, %d0              /* Set failure code in %d0 */
     rts
+
+/* Send a string over UART */
+uart_send_string:
+    movea.l %a0, %a1             /* Load the address of the string into A1 */
+    
+uart_send_string_loop:
+    move.b  (%a1)+, %d1          /* Load the next character from the string into D1 and increment A1 */
+    tst.b   %d1                  /* Check if the character is null (0x00) */
+    beq     uart_send_string_done /* If null, end the loop */
+    jsr     uart_send_byte       /* Call uart_send_byte to transmit the character */
+    bra     uart_send_string_loop /* Loop back for the next character */
+
+uart_send_string_done:
+    rts                          /* Return when the string is fully sent */
 
 /* Send a byte over UART */
 uart_send_byte:
