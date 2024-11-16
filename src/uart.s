@@ -16,15 +16,41 @@
 .equ UART_ACR, UART_BASE + 5     /* Auxiliary Control Register (ACR) */
 .equ UART_IMR, UART_BASE + 7     /* Interrupt Mask Register (IMR) */
 
-/* UART Initialisation Routine */
+/* Delay subroutine 
+At 8mhz
+100 iterations × 18 cycles = 1800 clock cycles.
+1800 cycles × 125 ns = 225 µs total delay.
+*/
+uart_delay:
+    move.l  #100, %d0            /* Adjust the loop counter based on timing requirements */
+delay_loop:
+    subq.l  #1, %d0
+    bne     delay_loop
+    rts
+
+/* Updated uart_init using delay subroutine */
 uart_init:
     move.b  #0x20, UART_CR       /* Reset MR pointer */
+    jsr     uart_delay           /* Delay */
+
     move.b  #0x13, UART_MR       /* Configure MR1A: 8 Data Bits, No Parity */
+    jsr     uart_delay           /* Delay */
+
     move.b  #0x07, UART_MR       /* Configure MR2A: 1 Stop Bit, Normal Mode */
+    jsr     uart_delay           /* Delay */
+
     move.b  #0xC0, UART_CSR      /* Set baud rate to 19.2 kbps (CSR = 1100) */
+    jsr     uart_delay           /* Delay */
+
     move.b  #0x80, UART_ACR      /* Enable Baud Rate Generator */
+    jsr     uart_delay           /* Delay */
+
     move.b  #0x05, UART_CR       /* Enable Transmitter and Receiver */
+    jsr     uart_delay           /* Delay */
+
     move.b  #0x00, UART_IMR      /* Disable all interrupts */
+    jsr     uart_delay           /* Delay */
+
     rts
 
 /* UART Self-Check Routine */
