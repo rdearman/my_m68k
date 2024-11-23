@@ -48,6 +48,25 @@ _start:
 	#move.l  #0x200000, %a7  /* Set up stack pointer to top of RAM */
 	move.l  #0x40800000, %sp  /* Set up stack pointer to top of RAM */
 
+    /* COMMENT THIS OUT AFTER THE FIRST TEST OF NEW HARDWARE */
+    move.l  #0xF5555, %a0   /* Load 0xF5555 into address register A0 */
+    move.w  #1000, %d0      /* Load 1000 into data register D0 */
+LOOP:
+    sub.w   #1, %d0         /* Subtract 1 from D0 */
+    bne     LOOP            /* Branch to LOOP if D0 is not zero */
+
+    /* Second loop */
+    move.l  #0xFAAAA, %a0   /* Load 0xFAAAA into address register A0 */
+    move.w  #1000, %d0      /* Reload 1000 into D0 */
+LOOP2:
+    sub.w   #1, %d0         /* Subtract 1 from D0 */
+    bne     LOOP2           /* Branch to LOOP2 if D0 is not zero */
+
+    /* End program */
+    jmp     _START          /* Jump to _START to restart */
+	/* COMMENT THIS OUT AFTER THE FIRST TEST OF NEW HARDWARE */
+	
+	
 	jsr     uart_init                  /* Call uart_init using jsr */
 
 	move.b  #'A', %d1                /* Load ASCII 'A' into %d1 */
