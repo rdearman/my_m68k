@@ -1,5 +1,7 @@
 # Toolchain
 CFLAGS := -m68000 -g
+ASFLAGS = -g -m68000
+LDFLAGS = -T m68k.ld  # Use the custom linker script
 
 # Check if running on Windows
 ifeq ($(OS),Windows_NT)
@@ -18,8 +20,8 @@ else
     OBJCOPY = m68k-linux-gnu-objcopy
 
     # Define dd commands for Unix-based systems
-    CREATE_BOOTLOADER_HIGH = dd if=bin/bootloader.bin of=bin/bootloader_high.bin bs=1 skip=1 count=2
-    CREATE_BOOTLOADER_LOW = dd if=bin/bootloader.bin of=bin/bootloader_low.bin bs=1 skip=0 count=2
+    CREATE_BOOTLOADER_HIGH = xxd -p -c 2 bin/bootloader.bin | cut -c3-4 | xxd -r -p > bin/bootloader_high.bin
+    CREATE_BOOTLOADER_LOW = xxd -p -c 2 bin/bootloader.bin | cut -c1-2 | xxd -r -p > bin/bootloader_low.bin
 	RM = rm -rf
 	MK = mkdir 
     NULLDEV = /dev/null
@@ -103,4 +105,3 @@ clean:
 	$(RM) $(BUILD_DIR)
 	$(RM) $(BIN_DIR)
 	find . -name '*~' -type f -delete
-	

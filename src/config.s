@@ -2,13 +2,13 @@
 
 	/* ===== Memory Addresses ===== */
 .equ ROM_BASE_ADDR, 0x00000000      /* Base address of ROM */
-.equ RAM_BASE_ADDR, 0x00100000      /* Base address of RAM */
-.equ STACK_TOP_ADDR, 0x200000       /* Top of stack in RAM */
+.equ RAM_BASE_ADDR, 0x00400000      /* Base address of RAM */
+.equ STACK_TOP_ADDR, 0x007FFFFF       /* Top of stack in RAM */
 .equ VECTOR_TABLE_ADDR, 0x00000000  /* Base address for interrupt vector table */
 .equ BOOTLOADER_ENTRY, 0x00000000   /* Bootloader start address */
 
 	/* ===== VIA (W65C22N6TPG) Configuration ===== */
-.equ VIA_BASE_ADDR, 0x300000              /* Base address for VIA */
+.equ VIA_BASE_ADDR, 0x00800000              /* Base address for VIA */
 .equ VIA_INTERRUPT_LEVEL, 3               /* Priority level for VIA interrupt */
 
 	/* Register offsets for VIA */
@@ -34,13 +34,13 @@
 
 
 	/* ===== SPI Configuration ===== */
-.equ SPI_BASE_ADDR, 0xC00020        /* SPI base memory-mapped I/O address */
+.equ SPI_BASE_ADDR, 0x00C00020        /* SPI base memory-mapped I/O address */
 .equ SPI_INTERRUPT_LEVEL, 2         /* Priority level for SPI interrupt */
 .equ SPI_CTRL_REG, SPI_BASE_ADDR + 0x02 /* SPI control register offset */
 .equ SPI_STATUS_REG, SPI_BASE_ADDR + 0x04 /* SPI status register offset */
 
 	/* ===== I2C Configuration ===== */
-.equ I2C_BASE_ADDR, 0xC00040        /* I2C base memory-mapped I/O address */
+.equ I2C_BASE_ADDR, 0x00C00040        /* I2C base memory-mapped I/O address */
 .equ I2C_INTERRUPT_LEVEL, 3         /* Priority level for I2C interrupt */
 .equ I2C_CTRL_REG, I2C_BASE_ADDR + 0x02 /* I2C control register offset */
 .equ I2C_STATUS_REG, I2C_BASE_ADDR + 0x04 /* I2C status register offset */

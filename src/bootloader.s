@@ -1,9 +1,179 @@
 .include "config.s"
 
-.org 0x00000000
-.long 0x40800000
-	#.long 0x1400000     /* Initial Stack Pointer */
-.long _start    /* Start of bootloader code */
+	.section .data
+_initial_sp:
+    .long 0x007FFFFC  /* Top of RAM align 4 bytes*/
+
+	/* Vector Table Section */
+    .section .vectors, "a"          /* Vector table section */
+    .org 0x00000000                 /* Start at address 0 */
+
+	/* Reset Vectors */
+    .long _initial_sp                /* Vector 0: Initial Stack Pointer (SSP) */
+    .long _start                     /* Vector 1: Initial Program Counter (PC) */
+
+	/* Exception Vectors */
+    .long _bus_error                 /* Vector 2: Bus error */
+    .long _address_error             /* Vector 3: Address error */
+    .long _illegal_inst              /* Vector 4: Illegal instruction / BKPT */
+    .long _zero_divide               /* Vector 5: Zero divide */
+    .long _chk_inst                  /* Vector 6: CHK, CHK2 instruction */
+    .long _trapcc                    /* Vector 7: cpTRAPcc, TRAPcc, TRAPV instructions */
+    .long _priv_violation            /* Vector 8: Privilege violation */
+    .long _trace                     /* Vector 9: Trace */
+    .long _line_1010                 /* Vector 10: Unimplemented instruction (line 1010) */
+    .long _line_1111                 /* Vector 11: Unimplemented instruction (line 1111) */
+    .long _reserved                  /* Vector 12: Reserved */
+    .long _coproto_violation         /* Vector 13: Coprocessor protocol violation */
+    .long _format_error              /* Vector 14: Format error */
+    .long _uninit_vector             /* Vector 15: Uninitialised interrupt vector */
+
+	/* Level 1 - Level 7 Autovectors */
+    .long _spurious_interrupt        /* Vector 24: Spurious interrupt */
+    .long _level1_autovector         /* Vector 25: Level 1 autovector */
+    .long _level2_autovector         /* Vector 26: Level 2 autovector */
+    .long _level3_autovector         /* Vector 27: Level 3 autovector */
+    .long _level4_autovector         /* Vector 28: Level 4 autovector */
+    .long _level5_autovector         /* Vector 29: Level 5 autovector */
+    .long _level6_autovector         /* Vector 30: Level 6 autovector */
+    .long _level7_autovector         /* Vector 31: Level 7 autovector */
+
+	/* TRAP #0-15 Instructions */
+    .rept 16                         /* Repeat 16 times for TRAP vectors 32-47 */
+        .long _trap                  /* Trap handler */
+    .endr
+
+	/* Floating-Point Coprocessor Errors (48-54) */
+    .rept 7
+        .long _fpu_error             /* FPU error handler */
+    .endr
+
+	/* Memory Management Errors (56-58) */
+    .long _mmu_error                 /* Vector 56: MMU error */
+    .long _mmu_error                 /* Vector 57: MMU error */
+    .long _mmu_error                 /* Vector 58: MMU error */
+
+	/* User Device Interrupts */
+    .org 0x00000100                  /* Start user device interrupt vector area */
+    .rept 192                        /* User device vectors (64-255) */
+        .long _user_int              /* Placeholder handler for user interrupts */
+    .endr
+
+    .long 0                         /* Address error exception vector (optional, unused here) */
+    .rept (0x400 / 4 - 16)
+    .long _catchall
+    .endr       /* Zero out unused vectors */
+
+
+	/* --- Text Section --- */
+    .section .text                  /* Code section */
+    .global _init_start                  /* Declare _start as global */
+    .global _catchall
+    .global _address_error
+
+	/* ========== Default Interrupt Handlers ========== */
+
+_bus_error:
+	move.l (%sp)+, %d0             /* Pop faulting address from stack */
+	move.l %d0, 0x00FFFF10         /* Save it to a known memory location for debugging */
+
+	/* Retrieve and Save Status Register */
+	move.w (%sp)+, %d1             /* Pop status register from stack */
+	move.w %d1, 0x00FFFF14         /* Save it to another known memory location */
+
+	/* Debug Halt */
+	trap #0                        /* Trigger a breakpoint (optional) */
+	bra .                          /* Loop forever (halt the CPU) */
+
+_address_error:
+	/* Save Registers */
+	move.l  (%sp)+, %d0             /* Faulting address */
+	move.l  %d0, 0x00FFFF00         /* Store faulting address at a known location */
+	move.w  (%sp)+, %d1             /* Status register */
+	move.w  %d1, 0x00FFFF04         /* Store status register */
+
+	/* Infinite Loop for Debugging */
+	trap    #0                      /* Trigger a breakpoint (optional) */
+	bra     .                       /* Loop forever */
+
+_illegal_inst:
+	bra _catchall
+
+_zero_divide:
+	bra _catchall
+
+_chk_inst:
+	bra _catchall
+
+_trapcc:
+	bra _catchall
+
+_priv_violation:
+	bra _catchall
+
+_trace:
+	bra _catchall
+
+_line_1010:
+	bra _catchall
+
+_line_1111:
+	bra _catchall
+
+_reserved:
+	bra _catchall
+
+_coproto_violation:
+	bra _catchall
+
+_format_error:
+	bra _catchall
+
+_uninit_vector:
+	bra _catchall
+
+_spurious_interrupt:
+	bra _catchall
+
+_level1_autovector:
+	bra _catchall
+
+_level2_autovector:
+	bra _catchall
+
+_level3_autovector:
+	bra _catchall
+
+_level4_autovector:
+	bra _catchall
+
+_level5_autovector:
+	bra _catchall
+
+_level6_autovector:
+	bra _catchall
+
+_level7_autovector:
+	bra _catchall
+
+_fpu_error:
+	bra _catchall
+
+_mmu_error:
+	bra _catchall
+
+_trap:
+	bra _catchall
+
+_user_int:
+	bra _catchall
+
+_catchall:
+	/* HALT */
+	move.l #0x2700, %d0  /* Load interrupt mask to disable all interrupts */
+	move.w %d0, %sr      /* Set the status register to disable interrupts */
+	stop #0x2700         /* Halt the CPU with interrupts disabled */
+
 
 .section .data            /* Declare data section explicitly */
 .align 4                  /* Ensure proper alignment for pointers */
@@ -22,7 +192,6 @@ message1:
 message2:
 	.ascii "Starting Memory Check"
 	.byte
-
 
 .text
 
@@ -45,29 +214,10 @@ MONITOR_ENTRY:
 
 	/* Bootloader entry point */
 _start:
-	#move.l  #0x200000, %a7  /* Set up stack pointer to top of RAM */
-	move.l  #0x40800000, %sp  /* Set up stack pointer to top of RAM */
-
-    /* COMMENT THIS OUT AFTER THE FIRST TEST OF NEW HARDWARE */
-    move.l  #0xF5555, %a0   /* Load 0xF5555 into address register A0 */
-    move.w  #1000, %d0      /* Load 1000 into data register D0 */
-LOOP:
-    sub.w   #1, %d0         /* Subtract 1 from D0 */
-    bne     LOOP            /* Branch to LOOP if D0 is not zero */
-
-    /* Second loop */
-    move.l  #0xFAAAA, %a0   /* Load 0xFAAAA into address register A0 */
-    move.w  #1000, %d0      /* Reload 1000 into D0 */
-LOOP2:
-    sub.w   #1, %d0         /* Subtract 1 from D0 */
-    bne     LOOP2           /* Branch to LOOP2 if D0 is not zero */
-
-    /* End program */
-    jmp     _START          /* Jump to _START to restart */
-	/* COMMENT THIS OUT AFTER THE FIRST TEST OF NEW HARDWARE */
+	/* Initialize the stack pointer */
+	move.l _initial_sp, %sp  /* Set up stack pointer to top of RAM */
 	
-	
-	jsr     uart_init                  /* Call uart_init using jsr */
+	#jsr     uart_init                  /* Call uart_init using jsr */
 
 	move.b  #'A', %d1                /* Load ASCII 'A' into %d1 */
 	jsr     uart_send_byte           /* Send character over UART */
@@ -266,3 +416,26 @@ print_loop:
 done_print:
 	rts                               /* Return from subroutine */
 
+_boneyard:
+	/*=======================================================*/
+	/* COMMENT THIS OUT AFTER THE FIRST TEST OF NEW HARDWARE */
+	/*=======================================================*/	
+	move.l  #0x000F5555, %a0   /* Load 0xF5555 into address register A0 */
+	move.w  #1000, %d0      /* Load 1000 into data register D0 */
+LOOP:
+	sub.w   #4, %d0         /* Subtract 1 from D0 */
+	bne     LOOP            /* Branch to LOOP if D0 is not zero */
+
+	/* Second loop */
+	move.l  #0x000FAAAA, %a0   /* Load 0xFAAAA into address register A0 */
+	move.w  #1000, %d0      /* Reload 1000 into D0 */
+LOOP2:
+	sub.w   #4, %d0         /* Subtract 1 from D0 */
+	bne     LOOP2           /* Branch to LOOP2 if D0 is not zero */
+
+	/* End program */
+	jmp     _start          /* Jump to _START to restart */
+	/*=======================================================*/
+	/* COMMENT THIS OUT AFTER THE FIRST TEST OF NEW HARDWARE */
+	/*=======================================================*/
+	
