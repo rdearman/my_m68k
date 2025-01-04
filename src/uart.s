@@ -3,7 +3,7 @@
 .global uart_init, uart_send_byte, uart_receive_byte, uart_check, set_baud_rate, uart_send_string
 
 	/* Base addresses for each channel */
-.equ UART_BASE, 0x40000000
+.equ UART_BASE, 0x00B00000
 .equ UART_CHANNEL_A_BASE, UART_BASE       /* Channel A base address */
 .equ UART_CHANNEL_B_BASE, UART_BASE + 8   /* Channel B base address (offset 0x08) */
 

@@ -76,7 +76,7 @@
 
 	/* ===== Macro Definitions ===== */
 .macro LOAD_VECTOR handler, vector
-	move.l \handler, %a0
+	lea \handler, %a0
 	move.l %a0, \vector
 .endm
 
