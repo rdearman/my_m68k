@@ -1,6 +1,6 @@
 .include "config.s"
 .section .text
-.global uart_init, uart_send_byte, uart_receive_byte, uart_check, set_baud_rate, uart_send_string
+.global uart_init, uart_send_byte, uart_receive_byte, uart_check, set_baud_rate, uart_send_string, select_channel
 
 	/* Base addresses for each channel */
 .equ UART_BASE, 0x00B00000

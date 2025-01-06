@@ -1,15 +1,12 @@
 .include "config.s"
 
 	.section .data
-_initial_sp:
-    .long 0x007FFFFC  /* Top of RAM align 4 bytes*/
-
 	/* Vector Table Section */
     .section .vectors, "a"          /* Vector table section */
     .org 0x00000000                 /* Start at address 0 */
 
 	/* Reset Vectors */
-    .long _initial_sp                /* Vector 0: Initial Stack Pointer (SSP) */
+    .long STACK_TOP_ADDR                /* Vector 0: Initial Stack Pointer (SSP) */
     .long _start                     /* Vector 1: Initial Program Counter (PC) */
 
 	/* Exception Vectors */
@@ -202,7 +199,7 @@ message2:
 	/* External functions for device initialisation */
 .extern spi_init, spi_check, i2c_init, rtc_check
 .extern sd_init, sd_check, lcd_init, lcd_check
-.extern uart_check
+.extern uart_check, uart_init, uart_send_byte, select_channel
 
 	/* Conditional entry for monitor */
 MONITOR_ENTRY:
@@ -215,12 +212,22 @@ MONITOR_ENTRY:
 	/* Bootloader entry point */
 _start:
 	/* Initialize the stack pointer */
-	move.l _initial_sp, %sp  /* Set up stack pointer to top of RAM */
+	move.l #STACK_TOP_ADDR, %sp  /* Set up stack pointer to top of RAM */
 	
-	#jsr     uart_init                  /* Call uart_init using jsr */
+	jsr     uart_init                  /* Call uart_init using jsr */
+	
+    move.b  #0, %d1              /* Select Channel A */	
+	jsr     select_channel        /* Set base address for Channel A/0 or B/1 in %a0 */
+wait_for_q:	
+	jsr     uart_receive_byte    /* Wait for and retrieve a byte */
+    move.b  %d0, %d2            /* Store the received character in %d2 */
+    cmpi.b  #'q', %d2           /* Compare received character with 'q' */
+    bne     wait_for_q          /* Loop until the received character is 'q' */
 
-	move.b  #'A', %d1                /* Load ASCII 'A' into %d1 */
-	jsr     uart_send_byte           /* Send character over UART */
+	
+    /* At this point, %d2 contains 'q', and the loop exits */
+
+    /* Additional processing for received_char can be added here */
 
 	/* Add further initialisation steps here
 	jsr spi_init
@@ -416,26 +423,5 @@ print_loop:
 done_print:
 	rts                               /* Return from subroutine */
 
-_boneyard:
-	/*=======================================================*/
-	/* COMMENT THIS OUT AFTER THE FIRST TEST OF NEW HARDWARE */
-	/*=======================================================*/	
-	move.l  #0x000F5555, %a0   /* Load 0xF5555 into address register A0 */
-	move.w  #1000, %d0      /* Load 1000 into data register D0 */
-LOOP:
-	sub.w   #4, %d0         /* Subtract 1 from D0 */
-	bne     LOOP            /* Branch to LOOP if D0 is not zero */
 
-	/* Second loop */
-	move.l  #0x000FAAAA, %a0   /* Load 0xFAAAA into address register A0 */
-	move.w  #1000, %d0      /* Reload 1000 into D0 */
-LOOP2:
-	sub.w   #4, %d0         /* Subtract 1 from D0 */
-	bne     LOOP2           /* Branch to LOOP2 if D0 is not zero */
-
-	/* End program */
-	jmp     _start          /* Jump to _START to restart */
-	/*=======================================================*/
-	/* COMMENT THIS OUT AFTER THE FIRST TEST OF NEW HARDWARE */
-	/*=======================================================*/
 	
